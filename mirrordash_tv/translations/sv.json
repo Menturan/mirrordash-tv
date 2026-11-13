@@ -1,0 +1,6 @@
+{
+  "title": "TV",
+  "starting": "Startar {channel}",
+  "starting_hint": "Det tar några sekunder.",
+  "failed": "{channel} går inte att spela just nu"
+}

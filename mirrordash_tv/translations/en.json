@@ -1,0 +1,6 @@
+{
+  "title": "TV",
+  "starting": "Starting {channel}",
+  "starting_hint": "It takes a few seconds.",
+  "failed": "{channel} can't be played right now"
+}

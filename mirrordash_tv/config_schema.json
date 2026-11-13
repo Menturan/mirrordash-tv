@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TV",
+  "description": "SVT's live channels in a card. Give this module a screen position of its own (for example bottom right): the picture stays where the card was when it started, so it doesn't follow a card that other cards push around.",
+  "type": "object",
+  "properties": {
+    "channel": {
+      "type": "string",
+      "enum": ["svt1", "svt2", "svt24", "kunskapskanalen", "barnkanalen"],
+      "enum_titles": ["SVT1", "SVT2", "SVT24", "Kunskapskanalen", "Barnkanalen"],
+      "default": "svt1",
+      "title": "Channel",
+      "description": "The channel to play. SVT only shows its channels in Sweden. It plays whenever the module is enabled and shown: its schedule and Privacy Mode stop it."
+    },
+    "size": {
+      "type": "integer",
+      "enum": [480, 640, 854, 960, 1280],
+      "enum_titles": ["480 wide (small)", "640 wide", "854 wide", "960 wide (medium)", "1280 wide (720p, large)"],
+      "default": 960,
+      "title": "Size",
+      "description": "The picture's width in pixels; it is always 16:9. Wider than 1280 is more than the Raspberry Pi can show smoothly. Ignored in fullscreen."
+    },
+    "output": {
+      "type": "string",
+      "enum": ["jack", "hdmi"],
+      "enum_titles": ["3.5 mm jack", "The screen (HDMI)"],
+      "default": "jack",
+      "title": "Speakers",
+      "description": "Where the sound goes. The screen only if it has speakers: one without them stays silent."
+    },
+    "volume": {
+      "type": "integer",
+      "format": "slider",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 35,
+      "title": "Volume",
+      "description": "How loud, as it sounds (0-100). The Settings tab's volume sets the whole mirror's."
+    },
+    "fullscreen": {
+      "type": "boolean",
+      "default": false,
+      "title": "Fullscreen",
+      "description": "Cover the whole screen with the picture. No other card can be seen meanwhile."
+    }
+  }
+}
