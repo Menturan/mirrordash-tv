@@ -3,6 +3,7 @@ import contextlib
 import logging
 
 from mirrordash_tv.channels import API, CHANNELS, hls_url
+from mirrordash_tv.sources import OWN, chosen_id, own_sources
 
 logger = logging.getLogger("mirrordash.modules.mirrordash_tv")
 
@@ -24,13 +25,18 @@ class TvModule:
         self.interval = 60  # the card again once a minute at most (a change comes at once anyway)
         self.changed = asyncio.Event()
         self.preview = config.get("preview", False)  # the admin page's preview: never plays
-        self.channel = config["channel"] if config["channel"] in CHANNELS else "svt1"
+        # What plays: a ready-made channel (id), one of the owner's own sources (name, address), or nothing
+        self.own = own_sources(config.get("own_sources"))  # not saved yet: the key is missing
+        choice = chosen_id(config.get("source"))
+        self.channel = choice if choice in CHANNELS else None  # ready-made id
+        self.address = self.own.get(choice.removeprefix(OWN)) if choice.startswith(OWN) else None
+        self.title = CHANNELS[self.channel] if self.channel else choice.removeprefix(OWN) if self.address else None
         self.width = config["size"] if config["size"] in SIZES else 960
         self.output = config["output"]
         self.volume = int(config["volume"])
         self.fullscreen = config["fullscreen"]
         self.shown = False  # nothing plays until the mirror says the card is on the screen (on_shown)
-        self.state = "off"  # "off", "starting" (until the first picture), "playing" or "failed"
+        self.state = "off"  # "off", "no_channel", "starting" (until the first picture), "playing" or "failed"
         self.task = None
 
     # ── The card ──
@@ -47,18 +53,26 @@ class TvModule:
 
     async def render(self) -> str:
         """Nothing (the card takes no space) while off, and in fullscreen while the picture plays or starts."""
-        state = "starting" if self.preview else self.state
-        if state == "off" or (self.fullscreen and state != "failed" and not self.preview):
+        state = ("starting" if self.title else "no_channel") if self.preview else self.state
+        if state == "off" or (self.fullscreen and state not in ("failed", "no_channel") and not self.preview):
             return ""
-        return self.render_template("widget.html", state=state, channel=CHANNELS[self.channel], width=self.width,
+        return self.render_template("widget.html", state=state, channel=self.title, width=self.width,
                                     height=SIZES[self.width])
+
+    async def settings_list_source(self, item):
+        """The Channel setting's choices: the ready-made channels, then the owner's own sources (the rows of
+        the form as it is now, saved or not)."""
+        return ([{"id": id, "name": title} for id, title in CHANNELS.items()]
+                + [{"id": OWN + name, "name": name} for name in own_sources(item.get("own_sources"))])
 
     # ── Playing ── v0: whenever the card is shown (no switch for it yet)
     async def on_shown(self, shown: bool):
         """The mirror: the card is on the screen or not (the screen off, the module's schedule, privacy mode).
         Hidden, the video stops; shown again, it starts."""
         self.shown = shown
-        if shown and not self.preview:
+        if shown and not self.title:  # nothing chosen, or the chosen source is gone: say so, play nothing
+            self.state = "no_channel"
+        elif shown and not self.preview:
             if not (self.task and not self.task.done()):
                 self.task = asyncio.create_task(self.keep_playing())
         else:
@@ -82,8 +96,10 @@ class TvModule:
             self.state = "starting"
             self.changed.set()
             try:
-                answer, _ = await self.fetch_json(API.format(self.channel), max_age=0)  # an address of today
-                url = hls_url(answer)
+                url = self.address
+                if url is None:
+                    answer, _ = await self.fetch_json(API.format(self.channel), max_age=0)  # an address of today
+                    url = hls_url(answer)
                 if url is None:
                     raise RuntimeError("SVT gave no stream")
                 if not self.fullscreen:
@@ -100,12 +116,14 @@ class TvModule:
                     failed, reason = video.failed, video.reason
             except (RuntimeError, TimeoutError) as e:  # the mirror refused the video, or SVT didn't answer
                 reason = str(e) or type(e).__name__
+            if self.address:  # an own address can hold a token: never in the log, whatever the reason quotes
+                reason = reason.replace(self.address, "<address>")
             if not self.shown:
                 return
             if picture:
                 tries = 0
             if failed:
-                logger.warning(f"{self.channel} can't be played: {reason}")  # the reason only: no address in the log
+                logger.warning(f"{self.title!r} can't be played: {reason}")  # the name and the reason: no address in the log
                 self.state = "failed"
                 self.changed.set()
             await asyncio.sleep(RETRY[min(tries, len(RETRY) - 1)])

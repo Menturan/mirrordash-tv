@@ -1,7 +1,7 @@
 [project]
 name = "mirrordash-tv"
-version = "0.1.0"
-description = "Live TV on the mirror: SVT's channels in a card"
+version = "0.2.0"
+description = "Live TV on the mirror: SVT's channels and your own sources in a card"
 requires-python = ">=3.14"
 license = "MIT"  # LICENSE: yours to change; the template it came from asks nothing (MIT-0)
 license-files = ["LICENSE"]

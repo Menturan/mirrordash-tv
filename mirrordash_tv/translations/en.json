@@ -2,5 +2,6 @@
   "title": "TV",
   "starting": "Starting {channel}",
   "starting_hint": "It takes a few seconds.",
-  "failed": "{channel} can't be played right now"
+  "failed": "{channel} can't be played right now",
+  "no_channel": "No channel is chosen"
 }

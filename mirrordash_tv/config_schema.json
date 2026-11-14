@@ -1,16 +1,29 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "TV",
-  "description": "SVT's live channels in a card. Give this module a screen position of its own (for example bottom right): the picture stays where the card was when it started, so it doesn't follow a card that other cards push around.",
+  "description": "SVT's live channels, or a stream of your own, in a card. Give this module a screen position of its own (for example bottom right): the picture stays where the card was when it started, so it doesn't follow a card that other cards push around.",
   "type": "object",
   "properties": {
-    "channel": {
-      "type": "string",
-      "enum": ["svt1", "svt2", "svt24", "kunskapskanalen", "barnkanalen"],
-      "enum_titles": ["SVT1", "SVT2", "SVT24", "Kunskapskanalen", "Barnkanalen"],
-      "default": "svt1",
+    "source": {
+      "type": "object",
+      "format": "list",
       "title": "Channel",
-      "description": "The channel to play. SVT only shows its channels in Sweden. It plays whenever the module is enabled and shown: its schedule and Privacy Mode stop it."
+      "description": "What to play: a ready-made channel, or one of your own sources from the list below (save a new source first, then choose it here). SVT only shows its channels in Sweden. Renamed or removed a source? Choose again here. It plays whenever the module is enabled and shown: its schedule and Privacy Mode stop it."
+    },
+    "own_sources": {
+      "type": "array",
+      "title": "Your Own Sources",
+      "description": "Streams you add yourself: an HLS (.m3u8) or MP4 address, on the internet or on your home network (a NAS, a camera). They show up in the Channel list above. Home-network addresses need MirrorDash 0.18.",
+      "items": {
+        "type": "object",
+        "title": "Source",
+        "required": ["name", "url"],
+        "properties": {
+          "name": {"type": "string", "title": "Name", "maxLength": 40, "description": "Shown above the picture."},
+          "url": {"type": "string", "format": "lan-url", "title": "Address", "pattern": "^https?://\\S+$",
+                  "pattern_message": "Start with http:// or https://", "default": "http://192.168.1.20:8080/live/index.m3u8"}
+        }
+      }
     },
     "size": {
       "type": "integer",

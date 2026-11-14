@@ -10,9 +10,9 @@
 </style>
 
 <div class="flex-column">
-    {% if state == "failed" %}
+    {% if state == "failed" or state == "no_channel" %}
     <h2 class="module-header">{{ translations.get("title", "TV") }}</h2>
-    <div class="module-message"><i data-lucide="tv-minimal"></i><span>{{ translations.get("failed", "{channel} can't be played right now").format(channel=channel) }}</span></div>
+    <div class="module-message"><i data-lucide="tv-minimal"></i><span>{% if state == "failed" %}{{ translations.get("failed", "{channel} can't be played right now").format(channel=channel) }}{% else %}{{ translations.get("no_channel", "No channel is chosen") }}{% endif %}</span></div>
     {% else %}
     <h2 class="module-header">{{ channel }}</h2>
     <div class="tv__screen" data-video-window style="width: {{ width }}px; height: {{ height }}px">
