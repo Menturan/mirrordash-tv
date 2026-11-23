@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "TV",
+  "requires_mirrordash": "0.14",
   "description": "SVT's live channels, or a stream of your own, in a card. Give this module a screen position of its own (for example bottom right): the picture stays where the card was when it started, so it doesn't follow a card that other cards push around.",
   "type": "object",
   "properties": {
