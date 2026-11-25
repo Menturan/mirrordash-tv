@@ -7,6 +7,8 @@
         gap: 12px; border: 1px solid var(--color-dimmed-charcoal);
     }
     .tv__title { font-size: 24px; font-weight: 500; color: var(--color-high-contrast); }
+    /* The card's width is the module's preferred width or the owner's: a small card gets a smaller caption */
+    @container (max-width: 24rem) { .tv__title { font-size: 16px; } .tv__screen { gap: 6px; } }
     .tv__hint { color: var(--color-standard-gray); }
 </style>
 

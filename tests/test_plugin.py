@@ -32,7 +32,7 @@ def test_the_stream_is_the_hls_master_in_svts_answer():
 def test_the_settings_offer_what_the_code_knows():
     assert SCHEMA["properties"]["source"]["format"] == "list" and "channel" not in SCHEMA["properties"]
     assert callable(TvModule.settings_list_source)  # the method the core calls for the list
-    assert "size" not in SCHEMA["properties"] and SCHEMA["properties"]["width_percent"] == {"default": 50}  # the card sets the width
+    assert "size" not in SCHEMA["properties"] and "width_percent" not in SCHEMA["properties"] and SCHEMA["preferred_width"] == "60rem"  # the module sets the card width
     row = SCHEMA["properties"]["own_sources"]["items"]
     assert row["required"] == ["name", "url"] and row["properties"]["url"]["format"] == "lan-url"
     assert row["properties"]["name"]["maxLength"] == MAX_NAME
