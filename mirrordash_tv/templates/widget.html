@@ -2,6 +2,7 @@
      over .tv__screen, which is why the rectangle itself is plain and still. -->
 <style>
     .tv__screen {
+        width: 100%; aspect-ratio: 16 / 9;  /* the card's width (the module's width setting), always 16:9 */
         box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center;
         gap: 12px; border: 1px solid var(--color-dimmed-charcoal);
     }
@@ -11,11 +12,11 @@
 
 <div class="flex-column">
     {% if state == "failed" or state == "no_channel" %}
-    <h2 class="module-header">{{ translations.get("title", "TV") }}</h2>
+    {% if show_header %}<h2 class="module-header">{{ heading or translations.get("title", "TV") }}</h2>{% endif %}
     <div class="module-message"><i data-lucide="tv-minimal"></i><span>{% if state == "failed" %}{{ translations.get("failed", "{channel} can't be played right now").format(channel=channel) }}{% else %}{{ translations.get("no_channel", "No channel is chosen") }}{% endif %}</span></div>
     {% else %}
-    <h2 class="module-header">{{ channel }}</h2>
-    <div class="tv__screen" data-video-window style="width: {{ width }}px; height: {{ height }}px">
+    {% if show_header %}<h2 class="module-header">{{ heading or channel }}</h2>{% endif %}
+    <div class="tv__screen" data-video-window>
         {% if state == "starting" %}
         <span class="tv__title">{{ translations.get("starting", "Starting {channel}").format(channel=channel) }}</span>
         <span class="tv__hint body-base">{{ translations.get("starting_hint", "It takes a few seconds.") }}</span>

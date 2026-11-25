@@ -11,7 +11,7 @@ from jinja2 import Environment, FileSystemLoader
 
 from mirrordash_tv import plugin
 from mirrordash_tv.channels import CHANNELS, hls_url
-from mirrordash_tv.plugin import SIZES, TvModule, cubic
+from mirrordash_tv.plugin import TvModule, cubic
 from mirrordash_tv.sources import ADDRESS, MAX_NAME, own_sources
 
 PACKAGE = Path(plugin.__file__).parent
@@ -32,14 +32,13 @@ def test_the_stream_is_the_hls_master_in_svts_answer():
 def test_the_settings_offer_what_the_code_knows():
     assert SCHEMA["properties"]["source"]["format"] == "list" and "channel" not in SCHEMA["properties"]
     assert callable(TvModule.settings_list_source)  # the method the core calls for the list
-    assert SCHEMA["properties"]["size"]["enum"] == list(SIZES)
+    assert "size" not in SCHEMA["properties"] and SCHEMA["properties"]["width_percent"] == {"default": 50}  # the card sets the width
     row = SCHEMA["properties"]["own_sources"]["items"]
     assert row["required"] == ["name", "url"] and row["properties"]["url"]["format"] == "lan-url"
     assert row["properties"]["name"]["maxLength"] == MAX_NAME
     assert re.fullmatch(row["properties"]["url"]["pattern"], "http://nas:8080/a.m3u8")
     assert not re.fullmatch(row["properties"]["url"]["pattern"], "ftp://nas/a")
     assert all(ADDRESS.fullmatch(a) for a in ("https://a/b.m3u8", "http://192.168.1.20:8080/live/index.m3u8"))
-    assert all(abs(width * 9 / 16 - height) < 1 for width, height in SIZES.items())
 
 
 def test_the_volume_slider_is_on_radios_curve():
@@ -106,7 +105,7 @@ async def test_it_starts_when_shown_plays_and_leaves_when_hidden():
     assert options == {"url": hls_url(SVT1), "output": "hdmi", "volume": 0.125, "fullscreen": False, "hz": 50}
     module.fetch_json.assert_awaited_with("https://api.svt.se/video/ch-svt1", max_age=0)
     shown = await module.render()
-    assert (shown["state"], shown["channel"], shown["width"], shown["height"]) == ("playing", "SVT1", 960, 540)
+    assert (shown["state"], shown["channel"]) == ("playing", "SVT1")
 
     await module.on_shown(False)  # schedule or privacy mode
     assert module.left == [video] and await module.render() == ""
@@ -115,7 +114,7 @@ async def test_it_starts_when_shown_plays_and_leaves_when_hidden():
 
 @pytest.mark.asyncio
 async def test_it_waits_for_the_first_picture_and_a_failure_shows_one_line_then_it_tries_again():
-    module = make_module(source={"id": "svt2", "name": "SVT2"}, size=640)
+    module = make_module(source={"id": "svt2", "name": "SVT2"})
     first, second = Video(False, True, "no such stream"), Video(True, False, "")
     module.script += [first, second]
     await module.on_shown(True)
@@ -194,19 +193,21 @@ async def test_the_admin_preview_shows_the_card_and_never_plays():
 
 # ── The card ──
 
-def render(state, language="sv", channel="SVT1", width=960, height=540):
+def render(state, language="sv", channel="SVT1", show_header=True, heading=""):
     translations = json.loads((PACKAGE / "translations" / f"{language}.json").read_text())
     environment = Environment(loader=FileSystemLoader(PACKAGE / "templates"), autoescape=True)
-    return environment.get_template("widget.html").render(state=state, channel=channel, width=width, height=height,
-                                                         translations=translations)
+    return environment.get_template("widget.html").render(state=state, channel=channel, show_header=show_header,
+                                                         heading=heading, translations=translations)  # the last two: the core's
 
 
 def test_starting_is_still_text_in_the_rectangle_playing_is_a_plain_one_and_failing_one_line():
     starting = render("starting")
-    assert "Startar SVT1" in starting and 'data-video-window style="width: 960px; height: 540px"' in starting
+    assert "Startar SVT1" in starting and 'data-video-window>' in starting and "px" not in starting.split("<div")[-1]
     assert "Starting SVT1" in render("starting", "en")
     playing = render("playing")
     assert "data-video-window" in playing and "Startar" not in playing and "<h2 class=\"module-header\">SVT1</h2>" in playing
+    assert "module-header" not in render("playing", show_header=False)  # the heading is the core's Show heading
+    assert '<h2 class="module-header">My TV</h2>' in render("playing", heading="My TV")
     failed = render("failed", channel="SVT2")
     assert "SVT2 går inte att spela just nu" in failed and "module-message" in failed and "data-video-window" not in failed
 

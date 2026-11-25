@@ -7,7 +7,6 @@ from mirrordash_tv.sources import OWN, chosen_id, own_sources
 
 logger = logging.getLogger("mirrordash.modules.mirrordash_tv")
 
-SIZES = {480: 270, 640: 360, 854: 480, 960: 540, 1280: 720}  # width -> height, 16:9 (the Size setting)
 RETRY = (5, 10, 30, 60)  # seconds before a stream that ended or failed is started again, then every minute (as Radio)
 CARD_FIRST = 1  # seconds the card gets on the page before the mirror asks where its picture goes
 
@@ -31,7 +30,6 @@ class TvModule:
         self.channel = choice if choice in CHANNELS else None  # ready-made id
         self.address = self.own.get(choice.removeprefix(OWN)) if choice.startswith(OWN) else None
         self.title = CHANNELS[self.channel] if self.channel else choice.removeprefix(OWN) if self.address else None
-        self.width = config["size"] if config["size"] in SIZES else 960
         self.output = config["output"]
         self.volume = int(config["volume"])
         self.fullscreen = config["fullscreen"]
@@ -56,8 +54,7 @@ class TvModule:
         state = ("starting" if self.title else "no_channel") if self.preview else self.state
         if state == "off" or (self.fullscreen and state not in ("failed", "no_channel") and not self.preview):
             return ""
-        return self.render_template("widget.html", state=state, channel=self.title, width=self.width,
-                                    height=SIZES[self.width])
+        return self.render_template("widget.html", state=state, channel=self.title)
 
     async def settings_list_source(self, item):
         """The Channel setting's choices: the ready-made channels, then the owner's own sources (the rows of

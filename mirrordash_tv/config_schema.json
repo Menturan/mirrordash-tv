@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "TV",
-  "requires_mirrordash": "0.14",
+  "requires_mirrordash": "0.21",
   "description": "SVT's live channels, or a stream of your own, in a card.",
   "help": "Give this module a screen position of its own (for example bottom right): the picture stays where the card was when it started, so it doesn't follow a card that other cards push around.",
   "type": "object",
@@ -15,7 +15,7 @@
     },
     "own_sources": {
       "type": "array",
-      "title": "Your Own Sources",
+      "title": "Your own sources",
       "description": "Streams you add yourself; they show up in the Channel list above.",
       "help": "An HLS (.m3u8) or MP4 address, on the internet or on your home network (a NAS, a camera). Home-network addresses need MirrorDash 0.18.",
       "items": {
@@ -24,18 +24,16 @@
         "required": ["name", "url"],
         "properties": {
           "name": {"type": "string", "title": "Name", "maxLength": 40, "description": "Shown above the picture."},
-          "url": {"type": "string", "format": "lan-url", "title": "Address", "pattern": "^https?://\\S+$",
-                  "pattern_message": "Start with http:// or https://", "default": "http://192.168.1.20:8080/live/index.m3u8"}
+          "url": {
+            "type": "string",
+            "format": "lan-url",
+            "title": "Address",
+            "pattern": "^https?://\\S+$",
+            "pattern_message": "Start with http:// or https://",
+            "default": "http://192.168.1.20:8080/live/index.m3u8"
+          }
         }
       }
-    },
-    "size": {
-      "type": "integer",
-      "enum": [480, 640, 854, 960, 1280],
-      "enum_titles": ["480 wide (small)", "640 wide", "854 wide", "960 wide (medium)", "1280 wide (720p, large)"],
-      "default": 960,
-      "title": "Size",
-      "description": "The picture's width in pixels; it is always 16:9. Wider than 1280 is more than the Raspberry Pi can show smoothly. Ignored in fullscreen."
     },
     "output": {
       "type": "string",
@@ -59,6 +57,7 @@
       "default": false,
       "title": "Fullscreen",
       "description": "Cover the whole screen with the picture. No other card can be seen meanwhile."
-    }
+    },
+    "width_percent": {"default": 50}
   }
 }

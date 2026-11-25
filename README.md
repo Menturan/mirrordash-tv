@@ -21,8 +21,8 @@ and Barnkanalen share one feed at SVT, so they show the same picture. SVT only s
 | Setting | What it does |
 | :--- | :--- |
 | Channel | What plays: one of the ready-made channels above, or one of your own sources by its name. Nothing is chosen at first: the card then says *Ingen kanal är vald* until you choose |
-| Your Own Sources | A list of rows, each a Name (at most 40 characters) and an Address (`http://` or `https://`). See "Your own sources" |
-| Size | The picture's width: 480, 640, 854, 960 (default) or 1280 pixels, always 16:9. 1280 (720p) is the most the Raspberry Pi shows smoothly |
+| Your own sources | A list of rows, each a Name (at most 40 characters) and an Address (`http://` or `https://`). See "Your own sources" |
+| Width (the mirror's own setting) | The picture fills the card's width, always 16:9; the card starts at 50 % of the screen. Wider than 1280 pixels is more than the Raspberry Pi shows smoothly |
 | Speakers | The 3.5 mm jack or the screen's HDMI sound (a screen without speakers stays silent) |
 | Volume | 0-100 on the same curve as the Radio module; the default is low (35) |
 | Fullscreen | The picture covers the whole screen and no other card can be seen meanwhile |
@@ -33,7 +33,7 @@ or a carousel won't work).
 
 ## Your own sources
 
-Add a row under *Your Own Sources* (a name and an address), **save**, then pick the name in *Channel* and
+Add a row under *Your own sources* (a name and an address), **save**, then pick the name in *Channel* and
 save again. The name is the heading above the picture. The address plays as it is: the module looks nothing up.
 
 Two rows with the same name: the first one plays. If you rename or remove the source that is chosen, choose
